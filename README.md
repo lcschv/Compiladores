@@ -1,7 +1,9 @@
 
-Gerador de código + Compilador, immplementado para a disciplina de Compiladores no curso de Ciência da Computação da Universidade Federal de São João del Rei.
+						Gerador de código + Compilador
 
-Alunos: Lucas Chaves Lima
+Implementado para a disciplina de Compiladores no curso de Ciência da Computação da Universidade Federal de São João del Rei.
+
+Aluno: Lucas Chaves Lima
 
 Objetivo: 
 	O objetivo deste trabalho foi implementar um analisador sintático para a  linguagem c ( com algumas modificações). 
