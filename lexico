@@ -1,0 +1,218 @@
+import sys
+
+#                Estruturas
+numbers = ["1","2","3","4","5","6","7","8","9","0"]
+letters = ["a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p",
+          "q","r","s","t","u","v","w","x","y","z","_"]
+operators = ["+","-","*","/","=","||","&&","<",">","^"]
+separators = ["{","}","(",")","+","-","*","/","=","<",">",","," "," ","\n"]
+reserved_list = ["if","else","while","break","continue","print","read","int","float","string","char"]
+delineadores = ["{","}","(",")","'",'"',";",","]
+
+fin = sys.argv[1]
+fout = sys.argv[2]
+ids = open('ids.txt','w')
+if len(sys.argv) != 3:
+	print "Parametros Errados\n"
+	print "python.py nameFilein nameFileout"
+	exit
+
+arquivo = open(fin, 'r')
+fileTokens = open(fout,'w')
+codigo = arquivo.read()
+
+
+"""fileTokens.write("***********************************************************")
+fileTokens.write("\n")
+fileTokens.write("		PADRAO DO ANALISADOR LEXICO")
+fileTokens.write("\n")
+fileTokens.write("		<Token, line, column>")
+fileTokens.write("\n")
+fileTokens.write("***********************************************************")
+fileTokens.write("\n")
+fileTokens.write("\n")"""
+
+def findReserved():
+	i=0
+	sentinela=0
+	decimal = 0
+	linha = 1
+	coluna = 1
+	error = 0
+	while (i<len(codigo)):
+		if codigo[i].isalpha():
+			sentinela = i
+			while codigo[i] not in separators and codigo[i] not in delineadores:
+				i += 1
+				coluna += 1
+			word = codigo[sentinela:i]
+			if word not in reserved_list:
+				fileTokens.write("ID" + " "+ str(linha) + " "+ str(coluna - len(word)) +" " +str(word))
+				ids.write(str(word) + " "+ str(linha) + " "+ str(coluna - len(word)) + "\n")
+				fileTokens.write("\n")
+			else:
+				fileTokens.write(str(codigo[sentinela:i]) +" "+ str(linha) + " "+ str(coluna - len(word)))
+				fileTokens.write("\n")			
+		elif codigo[i].isdigit():
+			sentinela = i
+			while codigo[i].isdigit() or codigo[i] == ",":
+				i+=1
+				coluna+=1
+				if codigo[i] == ",":
+					decimal= 1 
+					if codigo[i+1].isdigit():
+						while codigo[i].isdigit():
+							i+=1
+							coluna+=1
+					else:
+						print "Erro, numero invalido"
+						error = 1;
+						break;
+			if error == 1:
+				break;
+			dig = codigo[sentinela:i]
+			if decimal == 1:
+				fileTokens.write("CONST" +" "+ str(linha) + " "+ str(coluna-len(dig)) + " " +str(dig) +" "+ "f")
+				fileTokens.write("\n")	
+			else:
+				fileTokens.write("CONST" +" "+ str(linha) + " "+ str(coluna-len(dig)) + " " +str(dig) + " "+ "i")
+				fileTokens.write("\n")
+			coluna +=1
+			decimal = 0
+		elif codigo[i] == "\n":
+			linha += 1
+			coluna=1
+			i+=1
+		elif codigo[i] == " ":
+			i+=1
+			coluna+=1
+		elif codigo[i] == "=":
+			if codigo[i+1] == "=":
+				fileTokens.write("EQ" +" "+ str(linha) + " "+ str(coluna))
+				fileTokens.write("\n")
+				i+=1
+				coluna+=1
+			else:
+				fileTokens.write("ATTR" +" "+ str(linha) + " "+ str(coluna))
+				fileTokens.write("\n")
+			i+=1
+			coluna+=1
+		elif codigo[i] == ">":
+			if codigo[i+1] == "=":
+				fileTokens.write("Greater" +" "+ str(linha) + " "+ str(coluna))
+				fileTokens.write("\n")
+				i+=1
+				coluna+=1
+			else:
+				fileTokens.write("GE" +" "+ str(linha) + " "+ str(coluna))
+				fileTokens.write("\n")
+			i+=1
+			coluna+=1
+		elif codigo[i] == "<":
+			if codigo[i+1] == "=":
+				fileTokens.write("Lower" +" "+ str(linha) + " "+ str(coluna))
+				fileTokens.write("\n")
+				i+=1
+				coluna+=1
+			else:
+				fileTokens.write("LE" +" "+ str(linha) + " "+ str(coluna))
+				fileTokens.write("\n")
+				i+=1
+				coluna+=1
+		elif codigo[i] == "&":
+			if codigo[i+1] == "&":
+				fileTokens.write("AND" +" "+ str(linha) + " "+ str(coluna))
+				fileTokens.write("\n")
+				i+=2
+				coluna+=2			
+		elif codigo[i] == "|":
+			if codigo[i+1] == "|":
+				fileTokens.write("OR" +" "+ str(linha) + " "+ str(coluna))
+				fileTokens.write("\n")
+				i+=2
+				coluna+=2
+		elif codigo[i] == "!":
+			if codigo[i+1] == "=":
+				fileTokens.write("DIFF" +" "+ str(linha) + " "+ str(coluna))
+				fileTokens.write("\n")
+				i+=2
+				coluna+=2
+				
+		elif codigo[i] == "+":
+				fileTokens.write("ADD" +" "+ str(linha) + " "+ str(coluna))
+				fileTokens.write("\n")
+				i+=1
+				coluna+=1
+		elif codigo[i] == "-":
+				fileTokens.write("SUB" +" "+ str(linha) + " "+ str(coluna))
+				fileTokens.write("\n")
+				i+=1
+				coluna+=1
+		elif codigo[i] == "*":
+				fileTokens.write("MULT" +" "+ str(linha) + " "+ str(coluna))
+				fileTokens.write("\n")
+				i+=1
+				coluna+=1		
+		elif codigo[i] == "/":
+				if codigo[i+1] == "/":
+					while codigo[i] != "\n":
+						i+=1
+				else:
+					fileTokens.write("DIV" +" "+ str(linha) + " "+ str(coluna))
+					fileTokens.write("\n")
+					i+=1
+					coluna+=1
+		elif codigo[i] == "%":
+				fileTokens.write("MOD" +" "+ str(linha) + " "+ str(coluna))
+				fileTokens.write("\n")
+				i+=1
+				coluna+=1				
+		elif codigo[i] == "^":
+				fileTokens.write("POW" +" "+ str(linha) + " "+ str(coluna))
+				fileTokens.write("\n")
+				i+=1
+				coluna+=1		
+										
+		elif codigo[i] in delineadores:
+			if codigo[i] == "{":
+				fileTokens.write("OpenBrace" +" "+ str(linha) + " "+ str(coluna))
+				fileTokens.write("\n")
+			elif codigo[i] == "}":
+				fileTokens.write("CloseBrace" +" "+ str(linha) + " "+ str(coluna))
+				fileTokens.write("\n")
+			elif codigo[i] == ",":
+				fileTokens.write("Coma" +" "+ str(linha) + " "+ str(coluna))
+				fileTokens.write("\n")
+			elif codigo[i] == "(":
+				fileTokens.write("OpenPar" +" "+ str(linha) + " "+ str(coluna))
+				fileTokens.write("\n")
+			elif codigo[i] == ")":
+				fileTokens.write("ClosePar" +" "+ str(linha) + " "+ str(coluna))
+				fileTokens.write("\n")
+			elif codigo[i] == ";":
+				fileTokens.write("Semi" +" "+ str(linha) + " "+ str(coluna))	
+				fileTokens.write("\n")
+			elif codigo[i] == "'":
+				i+=1
+				sentinela = i
+				while codigo[i] != "'":
+					i+=1
+					coluna+=1
+				texto = codigo[sentinela:i]
+				fileTokens.write("texto"+" "+ str(linha) + " "+ str(coluna - len(texto))+ " "+ str(texto)+" "+"s")
+				fileTokens.write("\n")
+			elif codigo[i] == '"':
+				i+=1
+				sentinela = i
+				while codigo[i] != '"':
+					i+=1
+					coluna+=1
+				texto = codigo[sentinela:i]
+				fileTokens.write("texto"+" "+ str(linha) + " "+ str(coluna - len(texto))+ " "+ str(texto)+ " "+"s")
+				fileTokens.write("\n")
+			i+=1
+			coluna+=1
+		elif codigo[i] not in numbers or codigo[i] not in letters or codigo[i] not in separators or codigo[i] not in operators or codigo[i] not in delineadores or codigo[i] not in reserved_list:
+			print "Error, Caracter Especial encontrado"
+			break;
+findReserved()
